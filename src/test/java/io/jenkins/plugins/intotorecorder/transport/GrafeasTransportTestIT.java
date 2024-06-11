@@ -33,7 +33,7 @@ public class GrafeasTransportTestIT {
     public void setUp() throws Exception {
         String grafeasServerUrl = System.getenv("GRAFEAS_SERVER_URL");
         String noteName = "projects/my-project/notes/my-note";
-        String resourceUri = "https://example.com/resource-uri";
+        String resourceUri = "https://plugins.jenkins.io/in-toto/";
         this.uri = new URI(grafeasServerUrl + "?noteName=" + noteName + "&resourceUri=" + resourceUri);
         this.transport = new GrafeasTransport(uri);
         this.key = RSAKey.read(keyFilepath);
