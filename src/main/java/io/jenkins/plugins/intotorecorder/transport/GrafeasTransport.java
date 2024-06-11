@@ -1,8 +1,10 @@
+/**
+ *
+ */
 package io.jenkins.plugins.intotorecorder.transport;
-
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
-
 import com.google.gson.Gson;
 
 import io.github.intoto.legacy.keys.Signature;
@@ -17,24 +19,29 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 
+
 public class GrafeasTransport extends Transport {
 
     GenericUrl uri;
     GrafeasOccurrence occurrence;
 
     public static class GrafeasInTotoMetadata {
+        // This class exists to represent the signed document format for Grafeas
+        // in-toto links.
+
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private ArrayList<Signature> signatures = new ArrayList<Signature>();
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private GrafeasInTotoLink signed;
 
         private static class GrafeasInTotoLink {
-            private List<String> command = new ArrayList<String>();
-            private List<Artifact> materials = new ArrayList<Artifact>();
-            private List<Artifact> products = new ArrayList<Artifact>();
-            private Map<String, Map<String, String>> byproducts = new HashMap<String, Map<String, String>>();
-            private Map<String, Map<String, String>> environment = new HashMap<String, Map<String, String>>();
+            // This class exists to represent the Grafeas document format for
+            // in-toto links.
 
             private static class Artifact {
+                @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
                 private String resourceUri;
+                @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
                 private Map<String, String> hashes;
 
                 private Artifact(String resourceUri, Map<String, String> hashes) {
@@ -42,29 +49,34 @@ public class GrafeasTransport extends Transport {
                     this.hashes = hashes;
                 }
 
-                public String getResourceUri() {
-                    return resourceUri;
-                }
-
-                public Map<String, String> getHashes() {
-                    return hashes;
-                }
             }
 
-            public GrafeasInTotoLink(List<String> command, Map<String, ArtifactHash> materials, Map<String, ArtifactHash> products, Map<String, Object> byproducts, Map<String, Object> environment) {
+            @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
+            private List<String> command = new ArrayList<String>();
+            @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
+            private List<Artifact> materials = new ArrayList<Artifact>();
+            @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
+            private List<Artifact> products = new ArrayList<Artifact>();
+            private Map<String, Map<String, String>> byproducts = new HashMap<String, Map<String, String>>();
+            private Map<String, Map<String, String>> environment = new HashMap<String, Map<String, String>>();
+
+            public GrafeasInTotoLink(List<String> command,
+                                     Map<String, ArtifactHash> materials,
+                                     Map<String, ArtifactHash> products,
+                                     Map<String, Object> byproducts,
+                                     Map<String, Object> environment) {
+
                 this.command = command;
 
                 for (Map.Entry<String, ArtifactHash> material : materials.entrySet()) {
-                     // FIXME: String resourceUri = "file://sha256:" + material.getValue().get("sha256") + ":" + material.getKey();
-
-                    Artifact artifact = new Artifact(material.getKey(), (Map<String, String>) material.getValue());
+                    // FIXME: String resourceUri = "file://sha256:" + material.getValue().get("sha256") + ":" + material.getKey();
+                    Artifact artifact = new Artifact(material.getKey(), (Map<String, String>)material.getValue());
                     this.materials.add(artifact);
                 }
 
                 for (Map.Entry<String, ArtifactHash> product : products.entrySet()) {
-                   // FIXME: String resourceUri = "file://sha256:" + product.getValue().get("sha256") + ":" + product.getKey();
-
-                    Artifact artifact = new Artifact(product.getKey(), (Map<String, String>) product.getValue());
+                    // FIXME: String resourceUri = "file://sha256:" + product.getValue().get("sha256") + ":" + product.getKey();
+                    Artifact artifact = new Artifact(product.getKey(), (Map<String, String>)product.getValue());
                     this.products.add(artifact);
                 }
 
@@ -81,55 +93,33 @@ public class GrafeasTransport extends Transport {
                 this.byproducts.put("customValues", stringByproducts);
                 this.environment.put("customValues", stringEnvironment);
             }
-
-            public List<String> getCommand() {
-                return command;
-            }
-
-            public List<Artifact> getMaterials() {
-                return materials;
-            }
-
-            public List<Artifact> getProducts() {
-                return products;
-            }
-
-            public Map<String, Map<String, String>> getByproducts() {
-                return byproducts;
-            }
-
-            public Map<String, Map<String, String>> getEnvironment() {
-                return environment;
-            }
         }
 
         public GrafeasInTotoMetadata(Link link) {
             this.signatures = link.getSignatures();
-            this.signed = new GrafeasInTotoLink(link.getCommand(), link.getMaterials(), link.getProducts(), link.getByproducts(), link.getEnvironment());
-        }
-
-        public ArrayList<Signature> getSignatures() {
-            return signatures;
-        }
-
-        public GrafeasInTotoLink getSigned() {
-            return signed;
+            this.signed = new GrafeasInTotoLink(
+                link.getCommand(),
+                link.getMaterials(),
+                link.getProducts(),
+                link.getByproducts(),
+                link.getEnvironment()
+            );
         }
     }
 
+
     public static class GrafeasOccurrence {
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private String noteName;
         private Map<String, String> resource = new HashMap<String, String>();
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private String kind = "INTOTO";
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
         private GrafeasInTotoMetadata intoto;
 
         public GrafeasOccurrence(String noteName, String resourceUri) {
             this.noteName = noteName;
             this.resource.put("uri", resourceUri);
-        }
-
-        public GrafeasInTotoMetadata getIntoto() {
-            return intoto;
         }
     }
 
@@ -149,9 +139,15 @@ public class GrafeasTransport extends Transport {
         this.uri.setScheme(scheme);
 
         String parameterString = uri.getQuery();
+
         Map<String, String> parameterMap = GrafeasTransport.getParameterMap(parameterString);
 
-        GrafeasOccurrence occurrence = new GrafeasOccurrence(parameterMap.get("noteName"), parameterMap.get("resourceUri"));
+        @edu.umd.cs.findbugs.annotations.SuppressFBWarnings("URF_UNREAD_FIELD")
+        GrafeasOccurrence occurrence = new GrafeasOccurrence(
+            parameterMap.get("noteName"),
+            parameterMap.get("resourceUri")
+        );
+
         this.occurrence = occurrence;
     }
 
@@ -161,11 +157,21 @@ public class GrafeasTransport extends Transport {
         Gson gson = new Gson();
         String jsonString = gson.toJson(this.occurrence);
 
+        // FIXME: Shamelessly copied from GenericCRUD.java
         try {
-            HttpRequest request = new NetHttpTransport().createRequestFactory().buildPostRequest(this.uri, ByteArrayContent.fromString("application/json", jsonString));
+            HttpRequest request = new NetHttpTransport()
+                .createRequestFactory()
+                .buildPostRequest(this.uri,
+                    ByteArrayContent.fromString("application/json",
+                        jsonString));
             request.execute();
+
+            /* FIXME: should handle error codes and other situations more appropriately,
+             * but this gets the job done for a PoC
+             */
         } catch (IOException e) {
-            throw new RuntimeException("for URL " + this.uri.toString() + " couldn't serialize to HTTP server: " + e.toString());
+            throw new RuntimeException("for URL " + this.uri.toString() +
+                " couldn't serialize to HTTP server: " + e.toString());
         }
     }
 }
